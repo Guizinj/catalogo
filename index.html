@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrinquedosMania — Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ════════════════ HEADER ════════════════ -->
+<header>
+  <div class="logo">Brinquedos<span>Mania</span></div>
+  <div class="header-actions">
+    <button class="btn btn-outline btn-sm" onclick="showPage('catalog')">🏠 Vitrine</button>
+    <button class="btn btn-primary btn-sm" onclick="showPage('admin')">⚙️ Admin</button>
+  </div>
+</header>
+
+<!-- ════════════════ PÁGINA: CATÁLOGO ════════════════ -->
+<div id="page-catalog" class="page active">
+  <div class="hero">
+    <h1>🧸 Os melhores brinquedos da cidade!</h1>
+    <p>Encontre o presente perfeito para cada idade</p>
+    <div class="search-wrap">
+      <input type="text" id="search-input" placeholder="Buscar brinquedo..." oninput="filterProducts()">
+      <button onclick="filterProducts()">Buscar</button>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <span>Filtrar:</span>
+    <button class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')">Todos</button>
+    <button class="filter-chip" data-filter="Bebê" onclick="setFilter(this,'Bebê')">👶 Bebê</button>
+    <button class="filter-chip" data-filter="Educativo" onclick="setFilter(this,'Educativo')">🎓 Educativo</button>
+    <button class="filter-chip" data-filter="Aventura" onclick="setFilter(this,'Aventura')">🚀 Aventura</button>
+    <button class="filter-chip" data-filter="Jogos" onclick="setFilter(this,'Jogos')">🎲 Jogos</button>
+    <button class="filter-chip" data-filter="Pelúcia" onclick="setFilter(this,'Pelúcia')">🧸 Pelúcia</button>
+    <button class="filter-chip" data-filter="Controle Remoto" onclick="setFilter(this,'Controle Remoto')">🏎️ Controle Remoto</button>
+    <button class="filter-chip" data-filter="Novidades" onclick="setFilter(this,'Novidades')">✨ Novidades</button>
+  </div>
+
+  <div class="stats-bar" id="stats-bar">Carregando...</div>
+
+  <div class="catalog-grid" id="catalog-grid"></div>
+</div>
+
+<!-- ════════════════ PÁGINA: ADMIN ════════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-header">
+    <div>
+      <h2>⚙️ Painel Administrativo</h2>
+      <span>Gerencie o catálogo da loja</span>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="showPage('catalog')">← Ver vitrine</button>
+  </div>
+
+  <div class="admin-body">
+    <div class="admin-stats" id="admin-stats"></div>
+
+    <div class="admin-two-col">
+      <!-- FORMULÁRIO -->
+      <div class="admin-card">
+        <h3>➕ Cadastrar novo produto</h3>
+
+        <div class="form-group">
+          <label>Nome do produto *</label>
+          <input type="text" id="f-name" placeholder="Ex: Carrinho Super Veloz">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoria *</label>
+            <select id="f-category">
+              <option value="">Selecione...</option>
+              <option>Bebê</option>
+              <option>Educativo</option>
+              <option>Aventura</option>
+              <option>Jogos</option>
+              <option>Pelúcia</option>
+              <option>Controle Remoto</option>
+              <option>Novidades</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Faixa etária *</label>
+            <select id="f-age">
+              <option value="">Selecione...</option>
+              <option>0–2 anos</option>
+              <option>2–4 anos</option>
+              <option>4–6 anos</option>
+              <option>6–8 anos</option>
+              <option>8–12 anos</option>
+              <option>12+ anos</option>
+              <option>Todas as idades</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preço (R$) *</label>
+            <input type="number" id="f-price" placeholder="0,00" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label>Preço original (opcional)</label>
+            <input type="number" id="f-price-old" placeholder="Para promoção" step="0.01" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="f-desc" placeholder="Descreva o produto, materiais, diferenciais..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Badge</label>
+          <select id="f-badge">
+            <option value="">Nenhum</option>
+            <option value="novo">🟢 Novo</option>
+            <option value="promo">🟡 Promoção</option>
+            <option value="destaque">🔴 Destaque</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Escolha um emoji representativo *</label>
+          <div class="emoji-picker" id="emoji-picker"></div>
+          <input type="hidden" id="f-emoji" value="">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;padding:13px;font-size:1rem;margin-top:8px" onclick="addProduct()">
+          ✅ Cadastrar produto
+        </button>
+      </div>
+
+      <!-- LISTA DE PRODUTOS -->
+      <div class="admin-card">
+        <h3>📦 Produtos cadastrados</h3>
+        <div class="product-list-admin" id="admin-product-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ MODAL PRODUTO ════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-img" id="modal-img"></div>
+    <div class="modal-body">
+      <div class="modal-category" id="modal-category"></div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-price" id="modal-price"></div>
+      <div class="modal-actions">
+        <button style="background:var(--accent);color:#fff" onclick="shareProduct()">🔗 Copiar link</button>
+        <button style="background:#25D366;color:#fff" onclick="shareWhatsApp()">💬 WhatsApp</button>
+        <button style="background:var(--primary);color:#fff" onclick="closeModalDirect()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

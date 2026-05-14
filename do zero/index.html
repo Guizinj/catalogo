@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Happy Kids</title>
+
+<style>
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    background: #f5f5f5;
+    padding: 30px;
+}
+
+h1{
+    margin-bottom: 10px;
+}
+
+h3{
+    margin-bottom: 15px;
+}
+
+.painel{
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+input{
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+button{
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover{
+    transform: scale(1.03);
+}
+
+#novo{
+    background: #4CAF50;
+    color: white;
+}
+
+#vitrine{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.card{
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card h3{
+    margin-bottom: 10px;
+}
+
+.card p{
+    margin-bottom: 10px;
+}
+
+.total{
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.acoes{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.excluir{
+    background: #ff4d4d;
+    color: white;
+}
+
+.editar{
+    background: #ffd54f;
+}
+
+.add{
+    background: #4CAF50;
+    color: white;
+}
+
+.remove{
+    background: #ff9800;
+    color: white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="painel">
+
+<h1>Painel Admin</h1>
+
+<h3>Adicione os itens</h3>
+
+<input type="text" id="pesquisar" oninput="filtrar()" placeholder="Buscar...">
+
+<br><br>
+
+<input type="text" id="brinquedo" placeholder="Nome do produto">
+
+<input type="number" id="preco" placeholder="Preço" style="width: 120px;">
+
+<br><br>
+
+<button id="novo">Adicionar item</button>
+
+<div class="total" id="total"></div>
+
+</div>
+
+<div id="vitrine"></div>
+
+<script>
+
+// LOCAL STORAGE
+const brinquedos = JSON.parse(localStorage.getItem('estoque')) || [];
+
+const vitrine = document.getElementById('vitrine');
+const total = document.getElementById('total');
+
+// SALVAR DADOS
+function salvarDados(){
+    localStorage.setItem('estoque', JSON.stringify(brinquedos));
+}
+
+// MOSTRAR PRODUTOS
+function mostrarBrinquedo(lista){
+
+    vitrine.innerHTML = [...lista].reverse().map((item)=> 
+
+    `<div class="card">
+
+        <h3>${item.nome}</h3>
+
+        <p>
+            Preço:
+            ${item.preco.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            })}
+        </p>
+
+        <p>Estoque: ${item.quantidade}x</p>
+
+        <div class="acoes">
+
+            <button class="add" onclick="addUni(${item.id})">
+                ➕
+            </button>
+
+            <button class="remove" onclick="removerUnidade(${item.id})">
+                ➖
+            </button>
+
+            <button class="editar" onclick="editarPreco(${item.id})">
+                🏷️ Alterar preço
+            </button>
+
+            <button class="excluir" onclick="removerItemInteiro(${item.id})">
+                🗑️ Excluir
+            </button>
+
+        </div>
+
+    </div>`
+
+    ).join('');
+
+    mostrarTotal();
+}
+
+// TOTAL DO ESTOQUE
+function mostrarTotal(){
+
+    const soma = brinquedos.reduce((acc, item)=>{
+        return acc + (item.preco * item.quantidade);
+    }, 0);
+
+    total.innerHTML = `
+        Valor total do estoque:
+        ${soma.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        })}
+    `;
+}
+
+// ADICIONAR ITEM
+document.getElementById('novo').addEventListener('click', () => {
+
+    const nome = document.getElementById('brinquedo').value.trim();
+
+    const preco = parseFloat(
+        document.getElementById('preco').value
+    );
+
+    if(!nome || !preco){
+        return alert("Preencha tudo");
+    }
+
+    const existente = brinquedos.find(
+        b => b.nome.toLowerCase() === nome.toLowerCase()
+    );
+
+    if(existente){
+
+        existente.quantidade += 1;
+
+    } else {
+
+        brinquedos.push({
+            id: Date.now(),
+            nome: nome,
+            preco: preco,
+            quantidade: 1
+        });
+
+    }
+
+    salvarDados();
+
+    document.getElementById('brinquedo').value = "";
+    document.getElementById('preco').value = "";
+
+    document.getElementById('brinquedo').focus();
+
+    filtrar();
+
+});
+
+// ENTER PARA ADICIONAR
+document.getElementById('preco').addEventListener('keydown', (e)=>{
+
+    if(e.key === 'Enter'){
+        document.getElementById('novo').click();
+    }
+
+});
+
+// EDITAR PREÇO
+function editarPreco(idRecebido){
+
+    const posicao = brinquedos.findIndex(
+        item => item.id === idRecebido
+    );
+
+    if(posicao !== -1){
+
+        const novoPrecoTexto = prompt(
+            `Qual o novo preço para ${brinquedos[posicao].nome}?`,
+            brinquedos[posicao].preco
+        );
+
+        if(novoPrecoTexto === null) return;
+
+        const novoPrecoNum = parseFloat(
+            novoPrecoTexto.replace(',', '.')
+        );
+
+        if(!isNaN(novoPrecoNum) && novoPrecoNum > 0){
+
+            brinquedos[posicao].preco = novoPrecoNum;
+
+            salvarDados();
+
+            filtrar();
+
+        } else {
+
+            alert("Preço inválido!");
+
+        }
+    }
+}
+
+// ADICIONAR UNIDADE
+function addUni(idAtual){
+
+    const posicao = brinquedos.findIndex(
+        item => item.id === idAtual
+    );
+
+    if(posicao !== -1){
+
+        brinquedos[posicao].quantidade += 1;
+
+        salvarDados();
+
+    }
+
+    filtrar();
+}
+
+// REMOVER UNIDADE
+function removerUnidade(id){
+
+    const index = brinquedos.findIndex(
+        b => b.id === id
+    );
+
+    if(index !== -1){
+
+        if(brinquedos[index].quantidade > 1){
+
+            brinquedos[index].quantidade--;
+
+        } else {
+
+            brinquedos.splice(index, 1);
+
+        }
+
+        salvarDados();
+
+    }
+
+    filtrar();
+}
+
+// REMOVER ITEM INTEIRO
+function removerItemInteiro(id){
+
+    const confirmar = confirm(
+        "Deseja excluir esse produto?"
+    );
+
+    if(confirmar){
+
+        const index = brinquedos.findIndex(
+            b => b.id === id
+        );
+
+        if(index !== -1){
+
+            brinquedos.splice(index, 1);
+
+            salvarDados();
+
+        }
+
+        filtrar();
+    }
+}
+
+// FILTRAR
+function filtrar(){
+
+    const busca = document
+    .getElementById('pesquisar')
+    .value
+    .toLowerCase();
+
+    const filtrados = brinquedos.filter(
+        i => i.nome.toLowerCase().includes(busca)
+    );
+
+    mostrarBrinquedo(filtrados);
+}
+
+mostrarBrinquedo(brinquedos);
+
+</script>
+
+</body>
+</html>
